@@ -12,7 +12,7 @@ export class UserActionApi extends BaseRoute {
         return this.requestWrapper({
             method: 'post',
             url: '/useractions',
-            data: userAction
+            data: JSON.stringify(userAction)
         });
     }
 }

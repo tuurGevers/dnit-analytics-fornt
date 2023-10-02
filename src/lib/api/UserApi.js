@@ -16,12 +16,13 @@ export class UserApi extends BaseRoute {
             data: userSessionDTO
         });
     }
-    async startNewUserSession( websiteId) {
+
+    async startNewUserSession(websiteId) {
         const data = await gatherBrowserData()
         console.log(data)
         const userSessionDTO = {
-            userDemographicInfo:JSON.stringify(data) ,
-            websiteId:websiteId
+            userDemographicInfo: JSON.stringify(data),
+            websiteId: websiteId
         };
 
         this.createNewUserAndSession(userSessionDTO)
@@ -34,5 +35,16 @@ export class UserApi extends BaseRoute {
             .catch(error => {
                 console.error("Error creating new user and session:", error);
             });
+    }
+
+    endSession() {
+        const session = JSON.parse(localStorage.newSession);
+        console.log(session.second.sessionId)
+        this.requestWrapper({
+            method: 'post',
+            url: '/sessions/end/'+session.second.sessionId,
+            data:{}
+        })
+        localStorage.removeItem("newSession")
     }
 }

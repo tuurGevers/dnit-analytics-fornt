@@ -1,6 +1,7 @@
 // MetricApi.js
 
 import {BaseRoute} from "./BaseRoute.js";
+import {getPageLoadMetrics} from "../metricData/getPageLoadMetrics.js";
 
 export class MetricApi extends BaseRoute {
     async fetchAllPageLoadMetrics() {
@@ -31,5 +32,10 @@ export class MetricApi extends BaseRoute {
             url: '/resourceloadmetrics',
             data: resourceLoadMetric
         });
+    }
+
+    async gatherAndInsertPageLoadMetrics() {
+        const pageLoadMetric = getPageLoadMetrics();
+        return this.insertPageLoadMetric(pageLoadMetric);
     }
 }

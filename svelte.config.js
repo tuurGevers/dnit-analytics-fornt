@@ -1,6 +1,5 @@
 import adapter from '@sveltejs/adapter-auto';
-import preProcess from "./src/lib/preproccess/preProccess.cjs";
-
+import preProcessAnalytics from "./src/lib/preproccess/preProccess.js";
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
@@ -9,7 +8,7 @@ const config = {
 		// See https://kit.svelte.dev/docs/adapters for more information about adapters.
 		adapter: adapter()
 	},
-	preprocess:[preProcess.default("test")]
+	preprocess:[preProcessAnalytics("test")]
 };
 
 export default config;

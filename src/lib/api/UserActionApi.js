@@ -1,6 +1,6 @@
 import {BaseRoute} from "./BaseRoute.js";
 
-export class UserActionApi extends BaseRoute {
+export default  class UserActionApi extends BaseRoute {
     async fetchAllUserActions() {
         return this.requestWrapper({
             method: 'get',

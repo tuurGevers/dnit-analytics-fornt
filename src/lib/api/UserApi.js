@@ -1,7 +1,7 @@
 import {BaseRoute} from "./BaseRoute.js";
 import {gatherBrowserData} from "../metricData/getBrowserData.js";
 
-export class UserApi extends BaseRoute {
+export default  class UserApi extends BaseRoute {
     async fetchAllUsers() {
         return this.requestWrapper({
             method: 'get',

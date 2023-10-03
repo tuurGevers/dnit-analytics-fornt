@@ -1,6 +1,6 @@
-const { BaseRoute } = require('./BaseRoute.cjs');
+import { BaseRoute } from './BaseRoute.js';
 
-class ActionApi extends BaseRoute {
+export default class ActionApi extends BaseRoute {
     async getAllActions() {
         return this.requestWrapper({
             method: 'get',
@@ -24,4 +24,3 @@ class ActionApi extends BaseRoute {
     }
 }
 
-module.exports = { ActionApi };

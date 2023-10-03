@@ -1,18 +1,17 @@
-import {UserActionApi} from "../api/UserActionApi.js";
+import UserActionApi from "../api/UserActionApi.js";
 
 const userActionApi = new UserActionApi();
 
-export function testCreateUserAction() {
+export function testCreateUserAction(id) {
     const session = JSON.parse(localStorage.newSession);
-    // Mock UserAction object with test values
     const mockUserAction = {
-        userId: session.first.userId,          // This is a mock value, replace it as needed
-        actionId: 1,        // Mock value
-        websiteId: session.second.website.websiteId,       // Mock value
-        elementId: "test-element",
+        userId: session.first.userId,
+        actionId: 1,
+        websiteId: session.second.website.websiteId,
+        elementId: id,
         timestamp: new Date().toISOString(),
         additionalData: JSON.stringify({test: "data"}),
-        sessionId: session.second.sessionId,       // Mock value
+        sessionId: session.second.sessionId,
     };
 
 

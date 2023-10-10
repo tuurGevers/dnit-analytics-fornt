@@ -7,7 +7,7 @@ export function testCreateUserAction(id) {
     const mockUserAction = {
         userId: session.first.userId,
         actionId: 1,
-        websiteId: session.second.website.websiteId,
+        websiteId: session.second.websiteId,
         elementId: id,
         timestamp: new Date().toISOString(),
         additionalData: JSON.stringify({test: "data"}),

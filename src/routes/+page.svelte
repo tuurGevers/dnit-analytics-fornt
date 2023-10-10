@@ -1,5 +1,6 @@
 <script>
     import Test from "../lib/comp/Test.svelte";
+
 </script>
 
 <h1>Welcome to your library project</h1>

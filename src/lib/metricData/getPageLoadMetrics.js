@@ -5,7 +5,7 @@ export function getPageLoadMetrics() {
     const performanceData = window.performance.timing;
     const session = JSON.parse(localStorage.getItem("newSession"));
     metrics.userId = session.first.userId
-    metrics.websiteId = session.second.website.websiteId
+    metrics.websiteId = session.second.websiteId
     metrics.sessionId = session.second.sessionId
     metrics.url = window.location.href;
     metrics.timeToFirstByte = performanceData.responseStart - performanceData.requestStart;

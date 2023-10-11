@@ -2,11 +2,11 @@ import UserActionApi from "../api/UserActionApi.js";
 
 const userActionApi = new UserActionApi();
 
-export function testCreateUserAction(id) {
+export function testCreateUserAction(id, actionId) {
     const session = JSON.parse(localStorage.newSession);
     const mockUserAction = {
         userId: session.first.userId,
-        actionId: 1,
+        actionId: actionId,
         websiteId: session.second.websiteId,
         elementId: id,
         timestamp: new Date().toISOString(),

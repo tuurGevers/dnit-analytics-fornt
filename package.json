@@ -1,6 +1,6 @@
 {
 	"name": "dnit-analytics",
-	"version": "0.2.12",
+	"version": "0.3.4b",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",

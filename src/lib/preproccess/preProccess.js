@@ -32,7 +32,33 @@ export default function preProcessAnalytics(websiteName) {
             } else {
                 modifiedContent = `<script>\n import {testCreateUserAction} from "dnit-analytics"\n</script>\n` + modifiedContent;
             }
+            let imgMatches;
+            const imgRegex = /<img\s*([\s\S]*?)>/g;
 
+            while ((imgMatches = imgRegex.exec(modifiedContent)) !== null) {
+                const originalImg = imgMatches[0];
+                const imgAttributes = imgMatches[1];
+
+                const imgIdMatch = imgAttributes.match(/id=(["'].*?["']|\{.*?\})/);
+                const onClickImgMatch = imgAttributes.includes('on:click');
+
+                if (!imgIdMatch) {
+                    console.log("No ID found for img:", originalImg);
+                    continue; // Move to the next img if no ID is found
+                }
+
+                let imgId = imgIdMatch[1];
+                imgId = imgId.includes("{")?imgId.replaceAll("'","").replaceAll('"',"").replaceAll("{","").replaceAll("}",""):imgId
+                let modifiedImg;
+
+                if (onClickImgMatch) {
+                    modifiedImg = originalImg.replace('<img', `<img on:click="{()=>testCreateUserAction(${imgId}, 3)}"`);
+                } else {
+                    modifiedImg = originalImg.replace('/>', ` on:click="{()=>testCreateUserAction(${imgId},3)}"/>`);
+                }
+
+                modifiedContent = modifiedContent.replace(originalImg, modifiedImg);
+            }
             if (websiteId && modifiedContent.includes("<button")) {
                 let matches;
                 // This regex captures more reliably the contents of the button tag
@@ -42,7 +68,7 @@ export default function preProcessAnalytics(websiteName) {
                     const originalButton = matches[0];
                     const attributes = matches[1];
 
-                    const idMatch = attributes.match(/id=["'](.*?)["']/);
+                    const idMatch = attributes.match(/id=(["'].*?["']|\{.*?\})/);
                     const onClickMatch = attributes.includes('on:click');
 
                     if (!idMatch) {
@@ -50,13 +76,14 @@ export default function preProcessAnalytics(websiteName) {
                         continue; // Move to the next button if no ID is found
                     }
 
-                    const buttonId = idMatch[1];
+                    let buttonId = idMatch[1];
+                    buttonId = buttonId.includes("{")?buttonId.replaceAll("'","").replaceAll('"',"").replaceAll("{","").replaceAll("}",""):buttonId
                     let modifiedButton;
 
                     if (onClickMatch) {
-                        modifiedButton = originalButton.replace('<button', `<button on:click="{()=>testCreateUserAction('${buttonId}')}"`);
+                        modifiedButton = originalButton.replace('<button', `<button on:click="{()=>testCreateUserAction(${buttonId},1)}"`);
                     } else {
-                        modifiedButton = originalButton.replace('>', ` on:click="{()=>testCreateUserAction('${buttonId}')}">`);
+                        modifiedButton = originalButton.replace('>', ` on:click="{()=>testCreateUserAction(${buttonId},1)}">`);
                     }
 
                     modifiedContent = modifiedContent.replace(originalButton, modifiedButton);
@@ -72,6 +99,7 @@ export default function preProcessAnalytics(websiteName) {
 
                 const imports = `
     ${modifiedContent.includes("onMount") ? '' : 'import { onMount } from "svelte"'};
+    ${modifiedContent.includes("onDestroy") ? '' : 'import { onDestroy } from "svelte"'};
     import { UserApi, SessionApi, MetricsApi } from "dnit-analytics";
     import axios from "axios";
 `;
@@ -101,7 +129,7 @@ export default function preProcessAnalytics(websiteName) {
                     "\n" +
                     "console.log(localStorage.newSession)\n\n" +
                     "\n" +
-                    "        axios.interceptors.request.use(\n" +
+                    "      const requestInterceptor =   axios.interceptors.request.use(\n" +
                     "            (config) => {\n" +
                     "                config.metadata = { startTime: new Date().getTime() };\n" +
                     "                return config;\n" +
@@ -111,7 +139,7 @@ export default function preProcessAnalytics(websiteName) {
                     "            }\n" +
                     "        );\n" +
                     "\n" +
-                    "        axios.interceptors.response.use(\n" +
+                    "     const responseInterceptor =   axios.interceptors.response.use(\n" +
                     "            (response) => {\n" +
                     "                const endTime = new Date().getTime();\n" +
                     "                const duration = endTime - response.config.metadata.startTime;\n" +
@@ -122,6 +150,7 @@ export default function preProcessAnalytics(websiteName) {
                     "                    resourceType: 'xmlhttprequest', // This can be changed as per your requirement\n" +
                     "                    fetchStart: response.config.metadata.startTime,\n" +
                     "                    responseEnd: endTime,\n" +
+                    "                    additionalMetrics: JSON.stringify({body:response.config.data, headers:response.config.headers}),\n"+
                     "                    resourceSize: parseInt(response.headers['content-length'] || '0', 10) // This assumes the server sends the 'content-length' header\n" +
                     "                };\n" +
                     "\n" +
@@ -140,7 +169,9 @@ export default function preProcessAnalytics(websiteName) {
                     "                        resourceUrl: error.config.url,\n" +
                     "                        resourceType: 'xmlhttprequest',\n" +
                     "                        fetchStart: error.config.metadata.startTime,\n" +
-                    "                        responseEnd: endTime,\n" +
+                    "                    additionalMetrics: JSON.stringify({body:error.config.data, headers:error.config.headers}),\n"+
+
+                "                        responseEnd: endTime,\n" +
                     "                        resourceSize: parseInt(error.response.headers['content-length'] || '0', 10)\n" +
                     "                    };\n" +
                     "\n" +
@@ -150,6 +181,10 @@ export default function preProcessAnalytics(websiteName) {
                     "            }\n" +
                     "        );\n" +
                     "\n" +
+                    "onDestroy(() => {\n" +
+                    "    axios.interceptors.request.eject(requestInterceptor);\n" +
+                    "    axios.interceptors.response.eject(responseInterceptor);\n" +
+                    "});\n"+
                     "console.log('mount finished')\n"+
                     "    })"
 

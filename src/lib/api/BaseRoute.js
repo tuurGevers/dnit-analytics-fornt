@@ -2,7 +2,8 @@ import axios from "axios";
 
 export class BaseRoute {
     constructor() {
-        this.baseUrl = 'http://localhost:8080/api';
+        this.baseUrl = 'https://api.dnit-designs.com/api';
+        //this.baseUrl = 'http://localhost:8090/api';
         this.axiosInstance = axios.create({
             baseURL: this.baseUrl,
             headers: {

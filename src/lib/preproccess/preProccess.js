@@ -14,7 +14,6 @@ async function fetchActionsAndWriteToFile(websiteName) {
 }
 
 export default function preProcessAnalytics(websiteName) {
-    console.log("fetching");
     fetchActionsAndWriteToFile(websiteName);
     let websiteId;
 
@@ -39,7 +38,9 @@ export default function preProcessAnalytics(websiteName) {
                 const originalImg = imgMatches[0];
                 const imgAttributes = imgMatches[1];
 
-                const imgIdMatch = imgAttributes.match(/id=(["'].*?["']|\{.*?\})/);
+                console.log(imgAttributes)
+                console.log(imgAttributes.split("id="))
+                const imgIdMatch = (imgAttributes.split("id=")[1].split('" ')[0]+'"').replaceAll('"',"`").replaceAll("{", "${")
                 const onClickImgMatch = imgAttributes.includes('on:click');
 
                 if (!imgIdMatch) {
@@ -47,8 +48,8 @@ export default function preProcessAnalytics(websiteName) {
                     continue; // Move to the next img if no ID is found
                 }
 
-                let imgId = imgIdMatch[1];
-                imgId = imgId.includes("{")?imgId.replaceAll("'","").replaceAll('"',"").replaceAll("{","").replaceAll("}",""):imgId
+                let imgId = imgIdMatch;
+                imgId = imgId.startsWith("{") ? imgId.substring(1, imgId.length - 1) : imgId;  // Fixed substring call
                 let modifiedImg;
 
                 if (onClickImgMatch) {
@@ -59,16 +60,19 @@ export default function preProcessAnalytics(websiteName) {
 
                 modifiedContent = modifiedContent.replace(originalImg, modifiedImg);
             }
+
             if (websiteId && modifiedContent.includes("<button")) {
                 let matches;
-                // This regex captures more reliably the contents of the button tag
                 const regex = /<button\s*([\s\S]*?)>/g;
 
                 while ((matches = regex.exec(modifiedContent)) !== null) {
                     const originalButton = matches[0];
                     const attributes = matches[1];
 
-                    const idMatch = attributes.match(/id=(["'].*?["']|\{.*?\})/);
+                    // Updated regex pattern for matching id attribute
+                    console.log(attributes)
+                    console.log(attributes.split("id="))
+                    const idMatch = (attributes.split("id=")[1].split('" ')[0]+'"').replaceAll('"',"`").replaceAll("{", "${")
                     const onClickMatch = attributes.includes('on:click');
 
                     if (!idMatch) {
@@ -76,8 +80,8 @@ export default function preProcessAnalytics(websiteName) {
                         continue; // Move to the next button if no ID is found
                     }
 
-                    let buttonId = idMatch[1];
-                    buttonId = buttonId.includes("{")?buttonId.replaceAll("'","").replaceAll('"',"").replaceAll("{","").replaceAll("}",""):buttonId
+                    let buttonId = idMatch
+                    buttonId = buttonId.startsWith("{") ? buttonId.substring(1, buttonId.length - 1) : buttonId;  // Fixed substring call
                     let modifiedButton;
 
                     if (onClickMatch) {
@@ -189,10 +193,8 @@ export default function preProcessAnalytics(websiteName) {
                     "    })"
 
                 if (modifiedContent.includes("<script>")) {
-                    console.log("replace script"+`<script> \n ${imports}\n ${onMountFun}\n`)
                     modifiedContent = modifiedContent.replace("<script>", `<script> \n ${imports}\n ${onMountFun}\n`);
                 } else {
-                    console.log("new script"+`<script>\n ${imports}\n ${onMountFun}\n</script>\n`)
                     modifiedContent = `<script>\n ${imports}\n ${onMountFun}\n</script>\n` + modifiedContent;
                 }
             }
